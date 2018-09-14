@@ -1,0 +1,32 @@
+--- a/magic-lantern/modules/dual_iso/cr2hdr.c
++++ b/magic-lantern/modules/dual_iso/cr2hdr.c
+@@ -53,10 +53,10 @@
+ #include "timing.h"
+ #include "kelvin.h"
+ 
+-#define MODULE_STRINGS_PREFIX dual_iso_strings
++/* #define MODULE_STRINGS_PREFIX dual_iso_strings
+ #include "../module_strings_wrapper.h"
+ #include "module_strings.h"
+-MODULE_STRINGS()
++MODULE_STRINGS() */
+ 
+ /** Command-line interface */
+ 
+@@ -570,14 +570,14 @@
+ int main(int argc, char** argv)
+ {
+     printf("cr2hdr: a post processing tool for Dual ISO images\n\n");
+-    printf("Last update: %s\n", module_get_string(dual_iso_strings, "Last update"));
++    /* printf("Last update: %s\n", module_get_string(dual_iso_strings, "Last update")); */
+ 
+     fast_randn_init();
+ 
+     if (argc == 1)
+     {
+         printf("No input files.\n\n");
+-        printf("GUI usage: drag some CR2 or DNG files over cr2hdr.exe.\n\n");
++        /* printf("GUI usage: drag some CR2 or DNG files over cr2hdr.exe.\n\n"); */
+         show_commandline_help(argv[0]);
+         return 0;
+     }

@@ -1,0 +1,19 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+Icon=application-x-theme
+MimeType=image/x-canon-cr2;image/x-adobe-dng;
+Actions=convert_dualiso;raw_tags;
+X-KDE-StartupNotify=false
+X-KDE-Priority=TopLevel
+X-KDE-Submenu=Image Tools
+
+[Desktop Action convert_dualiso]
+Name=Detect & convert Dual ISO
+Icon=application-x-theme
+Exec=/usr/share/kservices5/ServiceMenus/imagetools_02_dualiso.sh %F
+
+[Desktop Action raw_tags]
+Name=Rename, Uncrop & Add Baseline Tags
+Icon=application-x-theme
+Exec=/usr/share/kservices5/ServiceMenus/imagetools_03_raw_resolution-baseline.sh %F

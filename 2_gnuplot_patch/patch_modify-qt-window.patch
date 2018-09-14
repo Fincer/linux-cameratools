@@ -1,0 +1,31 @@
+--- a/src/qtterminal/QtGnuplotWindow.cpp
++++ b/src/qtterminal/QtGnuplotWindow.cpp
+@@ -113,11 +113,14 @@
+ 	exportMenu->addAction(exportPngAction);
+ 	exportAction->setMenu(exportMenu);
+ 	m_toolBar->addAction(exportAction);
+-	createAction(tr("Replot")       , 'e', ":/images/replot");
+ 	createAction(tr("Show grid")    , 'g', ":/images/grid");
+ 	createAction(tr("Previous zoom"), 'p', ":/images/zoomPrevious");
+ 	createAction(tr("Next zoom")    , 'n', ":/images/zoomNext");
+-	createAction(tr("Autoscale")    , 'a', ":/images/autoscale");
++	createAction(tr("Reset Zoom")   , 'u', ":/images/autoscale");
++	//createAction(tr("Autoscale")    , 'a', ":/images/autoscale");
++	createAction(tr("Invert plots") , 'i', ":/images/invert");
++    createAction(tr("Hide all plots") , 'V', ":/images/hide");
++	createAction(tr("Show all plots") , 'v', ":/images/replot");
+ 	m_toolBar->addAction(settingsAction);
+ 
+ 	loadSettings();
+--- a/src/qtterminal/QtGnuplotResource.qrc
++++ b/src/qtterminal/QtGnuplotResource.qrc
+@@ -13,5 +13,7 @@
+ 	<file alias="images/zoomNext">images/zoom-in.png</file>
+ 	<file alias="images/autoscale">images/zoom-original.png</file>
+ 	<file alias="images/settings">images/configure.png</file>
++	<file alias="/images/hide">images/view-hide.png</file>
++	<file alias="/images/invert">images/view-invert.png</file>
+ </qresource>
+-</RCC>
+\ No newline at end of file
++</RCC>

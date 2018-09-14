@@ -1,0 +1,102 @@
+# Maintainer: Pekka Helenius <fincer89 at hotmail DOT com>
+
+pkgname=magiclantern-tools
+pkgver=1
+pkgrel=1
+pkgdesc="Magic Lantern image processing tools for Canon DSLR's with Magic Lantern firmware."
+arch=('any')
+url='https://bitbucket.org/hudson/magic-lantern'
+license=("GPL")
+depends=('perl-image-exiftool' 'dcraw')
+optdepends=('octave')
+makedepends=('mercurial')
+
+#REQUIRED BY MODULES
+#Use these dependencies only if you try compile more modules. They rely partially on rst2html5 package.
+#makedepends=rst2html5 python-docutils
+
+arm_compiler=gcc-arm-none-eabi-4_8-2013q4
+source=(
+#https://launchpad.net/gcc-arm-embedded/4.8/4.8-2013-q4-major/+download/$arm_compiler-20131204-linux.tar.bz2
+gcc-arm-none-eabi-4_8-2013q4-20131204-linux.tar.bz2 #local source
+magic-lantern_source_30092017.tar.bz2 #local source
+Makefile.user
+01-patch_tcc_makefile-fix.patch
+02_patch_cr2hdr-source_add-dryrun.patch
+03_patch_add_baseline-exif.patch
+04_patch_cr2hdr_disable-strings.patch
+05_patch_modules-makefile_disable-strings.patch
+)
+md5sums=('4869e6a6e1dc11ea0835e8b8213bb194'
+         '5f32b3c128cccebdac1520d442b95c95'
+         '035e3049e5f3205680566ffc6c6e9023'
+         '2adcdf6ed3a6cec7b7594ef310d5737a'
+         '2a921d40e65004bb0f9f4d274b83ff04'
+         '317c4ce8317182a98700b57b285ef184'
+         'd2e57664cbc7310521eee4b0b13a3f41'
+         '25281350b6a5a9f40a1b40933f0de829')
+
+prepare() {
+ cd "$srcdir"/
+
+ #####
+ #Download Magic Lantern latest source files
+ #hg clone -r unified https://bitbucket.org/hudson/magic-lantern
+ #####
+
+ #This is an ugly hack, I know. Make sure you update the patch file if you change ARM compiler
+ patch -Np1 -i "$srcdir"/01-patch_tcc_makefile-fix.patch
+
+ #Implement Dry Run feature in CR2HDR
+ patch -Np1 -i "$srcdir"/02_patch_cr2hdr-source_add-dryrun.patch
+
+ #Write Baseline Exposure values to EXIF tags:
+ patch -Np1 -i "$srcdir"/03_patch_add_baseline-exif.patch
+
+ #All modules have python issues (outdated code?) so they don't compile. The problem is related to version etc. strings. Just disable them and compile the code. Only used for cr2hdr (as we need it, not other modules)
+ patch -Np1 -i "$srcdir"/04_patch_cr2hdr_disable-strings.patch
+ patch -Np1 -i "$srcdir"/05_patch_modules-makefile_disable-strings.patch
+
+ #Custom compilation settings for Magic Lantern (Mainly ARM compiler path redefinition)
+ ln -s "$srcdir"/Makefile.user "$srcdir"/magic-lantern/Makefile.user
+ 
+ #Link downloaded ARM compiler files to Magic Lantern directory
+ ln -s "$srcdir"/$arm_compiler "$srcdir"/magic-lantern/$arm_compiler
+}
+
+build() {
+ cd "$srcdir"/magic-lantern  #/modules/dual_iso
+
+#######################################
+# FIRMWARE                                      - MODULES FAIL TO BUILD DUE TO PYTHON ISSUES
+ 
+ ##make 5D3          #5D Mark 3 - Both firmwares - DOESN'T INCLUDE MODULES YET
+ ##make 5D3.113      #5D Mark 3 - Firmware 1.1.3 - DOESN'T INCLUDE MODULES YET
+
+ #make 5D3.123       #5D Mark 3 - Firmware 1.2.3 - DOESN'T INCLUDE MODULES YET
+ #mkdir -p "$startdir"/5dmark3_firmware_123/
+ #cp "$srcdir"/magic-lantern/platform/5D3.123/{autoexec.bin,ML-SETUP.FIR} "$startdir"/5dmark3_firmware_123/ #magiclantern.bin,version.bin
+
+#######################################
+# MODULES
+
+ #make all_modules   #All modules               - FAIL TO BUILD DUE TO PYTHON ISSUES
+
+#CR2HDR application for host computer
+ cd "$srcdir"/magic-lantern/modules/dual_iso
+ make cr2hdr
+ cd ..
+
+#MLV_DUMP application for host computer
+ cd "$srcdir"/magic-lantern/modules/mlv_rec
+ make mlv_dump
+ cd ..
+
+}
+
+package()
+{
+mkdir -p "$pkgdir"/usr/bin
+cp "$srcdir"/magic-lantern/modules/dual_iso/cr2hdr "$pkgdir"/usr/bin
+cp "$srcdir"/magic-lantern/modules/mlv_rec/mlv_dump "$pkgdir"/usr/bin/mlvdump
+}

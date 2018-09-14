@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+Icon=application-x-theme
+MimeType=image/tiff;
+Actions=ale_imagestack;
+X-KDE-StartupNotify=false
+X-KDE-Priority=TopLevel
+X-KDE-Submenu=Image Tools
+
+[Desktop Action ale_imagestack]
+Name=Stack TIFF images
+Icon=application-exit
+Exec=/usr/share/kservices5/ServiceMenus/imagetools_07_ale_stack.sh %f

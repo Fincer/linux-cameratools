@@ -1,0 +1,11 @@
+--- a/magic-lantern/modules/dual_iso/exiftool-bridge.c
++++ a/magic-lantern/modules/dual_iso/exiftool-bridge.c
+@@ -10,7 +10,7 @@
+ {
+     char exif_cmd[1000];
+     printf("%-16s: copying EXIF from %s\n", dest, source);
+-    snprintf(exif_cmd, sizeof(exif_cmd), "exiftool -tagsFromFile \"%s\" -all:all \"-xmp:subject=Dual-ISO\" \"-UniqueCameraModel<Model\" \"%s\" -overwrite_original -q", source, dest);
++    snprintf(exif_cmd, sizeof(exif_cmd), "exiftool -tagsFromFile \"%s\" -all:all \"-xmp:subject=Dual ISO DNG\" \"-UniqueCameraModel<Model\" \"-BaselineExposure=0.25\" \"-BaselineNoise=0.8\" \"-BaselineSharpness=1.2\" \"-BayerGreenSplit=100\" \"%s\" -overwrite_original -q", source, dest);
+     int r = system(exif_cmd);
+     if(r!=0)
+     {

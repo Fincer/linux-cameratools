@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+Icon=application-x-theme
+MimeType=image/x-canon-cr2;image/x-adobe-dng;text/csv;
+Actions=statistics;
+X-KDE-StartupNotify=false
+X-KDE-Priority=TopLevel
+X-KDE-Submenu=Image Tools
+
+[Desktop Action statistics]
+Name=Statistics
+Icon=application-x-theme
+Exec=/usr/share/kservices5/ServiceMenus/imagetools_01_exif_statistics.sh %F

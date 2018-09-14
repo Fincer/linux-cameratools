@@ -1,0 +1,26 @@
+# Maintainer: Pekka Helenius <fincer89 at hotmail DOT com>
+
+# Source code files by Trammell Hudson // Magic Lantern
+
+pkgname=magiclantern-bootablecard
+pkgver=1
+pkgrel=1
+pkgdesc='Create a Magic Lantern compatible SD card for Canon EOS cameras (enable boot flag).'
+arch=('i686' 'x86_64')
+license=('GPL')
+url='https://bitbucket.org/hudson/magic-lantern/src/tip/contrib/make-bootable/'
+depends=('exfat-dkms-git' 'coreutils' 'exfat-utils-nofuse' 'util-linux')
+makedepends=('gcc')
+source=(magiclantern-bootablecard.tar.gz)
+md5sums=('50a78cd16d2d05b78c0273fe53a59236')
+
+build() {
+  gcc exfat_sum.c -I$srcdir/modules/lua/dietlibc/include/ -o $srcdir/exfat_sum
+}
+
+package() {
+  mkdir -p $pkgdir/usr/bin/
+  install -m755 $srcdir/{make_bootable.sh,exfat_sum} $pkgdir/usr/bin/
+  mv $pkgdir/usr/bin/make_bootable.sh $pkgdir/usr/bin/ml-bootablecard
+  chmod +x $pkgdir/usr/bin/ml-bootablecard
+}

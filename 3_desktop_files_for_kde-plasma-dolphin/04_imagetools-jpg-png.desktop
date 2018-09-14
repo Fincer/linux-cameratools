@@ -1,0 +1,19 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+Icon=application-x-theme
+MimeType=image/jpeg;image/png;
+Actions=exif_deletedata;exif_deletedata_critical;
+X-KDE-StartupNotify=false
+X-KDE-Priority=TopLevel
+X-KDE-Submenu=Image Tools
+
+[Desktop Action exif_deletedata]
+Name=Delete EXIF metadata
+Icon=application-exit
+Exec=/usr/share/kservices5/ServiceMenus/imagetools_06_exif_deletedata.sh %F
+
+[Desktop Action exif_deletedata_critical]
+Name=Delete critical EXIF metadata
+Icon=application-exit
+Exec=/usr/share/kservices5/ServiceMenus/imagetools_06_exif_deletedata_critical.sh %F

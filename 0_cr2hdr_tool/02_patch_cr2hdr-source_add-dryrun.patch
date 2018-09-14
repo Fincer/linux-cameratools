@@ -1,0 +1,71 @@
+--- a/magic-lantern/modules/dual_iso/cr2hdr.c
++++ b/magic-lantern/modules/dual_iso/cr2hdr.c
+@@ -60,6 +60,7 @@
+ 
+ /** Command-line interface */
+ 
++int process_method = 0;
+ int interp_method = 0;          /* 0:amaze-edge, 1:mean23 */
+ int chroma_smooth_method = 2;
+ int fix_pink_dots = 0;
+@@ -98,7 +99,13 @@
+ 
+ void check_shortcuts()
+ {
+-    if (shortcut_fast)
++    if (process_method == 1)
++    {
++        interp_method = 2;
++        chroma_smooth_method = 1;
++        gray_wb = 5;
++    }
++    else if (shortcut_fast)
+     {
+         interp_method = 1;
+         chroma_smooth_method = 0;
+@@ -129,6 +136,13 @@
+ 
+ struct cmd_group options[] = {
+     {
++        "Processing methods", (struct cmd_option[]) {
++            { &process_method, 0, "--process",  "Process Dual ISO compatible file (default)" },
++            { &process_method, 1, "--dry-run",  "Only check file for Dual ISO presence" },
++            OPTION_EOL
++        },
++    },
++    {
+         "Shortcuts", (struct cmd_option []) {
+             { &shortcut_fast, 1, "--fast",  "disable most postprocessing steps (fast, but low quality)\n"
+                             "                  (--mean23, --no-cs, --no-fullres, --no-alias-map, --no-stripe-fix, --no-bad-pix)" },
+@@ -870,12 +884,12 @@
+                 whites[num_files] = raw_info.white_level;
+                 num_files++;
+             }
+-            else
++            else if (process_method != 1)
+             {
+                 printf("ISO blending didn't work\n");
+             }
+         }
+-        else
++        else if (process_method != 1)
+         {
+             printf("Doesn't look like interlaced ISO\n");
+         }
+@@ -2206,7 +2220,15 @@
+     double corr_ev = 0;
+     int white_darkened = white_bright;
+     int ok = match_exposures(&corr_ev, &white_darkened);
+-    if (!ok) goto err;
++    if (!ok)
++    {
++        goto err;
++    }
++    else if (ok && process_method == 1)
++    {
++        printf("Interlaced ISO detected\n"); /*. File: %s\n", filename);*/
++        return 0;
++    }
+ 
+     /* run a second black subtract pass, to fix whatever our funky processing may do to blacks */
+     black_subtract_simple(raw_info.active_area.x1, raw_info.active_area.y1);
