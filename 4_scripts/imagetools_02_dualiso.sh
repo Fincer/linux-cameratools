@@ -30,7 +30,7 @@
 # We don't allow writing to SD card.
 
 #Sed is here to remove any trailing spaces and crap like blank lines
-INPUT_FILESYSTEM=$(df -h "${1}" | awk -F ' ' 'FNR> 1 {print $1}' | grep -i -E "/dev/sd?|/dev/hd?" | sed '/^\s*$/d' | wc -l)
+INPUT_FILESYSTEM=$(df -h "${1}" | awk -F ' ' 'FNR> 1 {print $1}' | grep -i -E "/dev/sd?|/dev/hd?|?rewritefs|/dev/nvme?" | sed '/^\s*$/d' | wc -l)
 
 if [[ "${INPUT_FILESYSTEM}" -eq 0 ]]; then #if input file (first file printed in bash) filesystem does not start with /dev/sdX
     kdialog --error "Image(s) are in a SD Card. Please move them your local or external storage and try again."
