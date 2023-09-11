@@ -211,7 +211,7 @@ FILENAME=$(echo "${DIR_BASENAME}-${FIRST}-${LAST}_metadata")
 FILE_EXT=.csv
 
 #Sed is here to remove any trailing spaces and crap like blank lines
-INPUT_FILESYSTEM=$(df -h "${1}" | awk -F ' ' 'FNR> 1 {print $1}' | grep -i -E "/dev/sd?|/dev/hd?|?rewritefs|/dev/nvme?" | sed '/^\s*$/d' | wc -l)
+INPUT_FILESYSTEM=$(df -h "${1}" | awk -F ' ' 'FNR> 1 {print $1}' | grep -i -E "/dev/sd?|/dev/hd?|?rewritefs|?tmpfs|/dev/nvme?" | sed '/^\s*$/d' | wc -l)
 
 #######################################################################
 # 2ND FILE CHECK
