@@ -1,49 +1,64 @@
-# Maintainer: Pekka Helenius <fincer89 at hotmail DOT com>
-
 pkgname=kde-servicemenus-imagetools
 pkgver=1
 pkgrel=1
 pkgdesc="Useful combination of tools for processing various images (KDE5 Dolphin action)"
-url=()
 arch=('any')
 license=('GPL')
-install=''
-source=(imagetools_01_exif_statistics.sh
-imagetools_02_dualiso.sh
-imagetools_03_raw_resolution-baseline.sh
-imagetools_04_mlvdump.sh
-imagetools_05_mlvinfo.sh
-imagetools_06_exif_deletedata.sh
-imagetools_06_exif_deletedata_critical.sh
-imagetools_07_ale_stack.sh
-01_imagetools-statistics.desktop
-02_imagetools-dng-cr2.desktop
-03_imagetools-mlv.desktop
-04_imagetools-jpg-png.desktop
-05_imagetools-imagestack.desktop)
+source=(
+  imagetools_01_exif_statistics.sh
+  imagetools_02_dualiso.sh
+  imagetools_03_raw_resolution-baseline.sh
+  imagetools_04_mlvdump.sh
+  imagetools_05_mlvinfo.sh
+  imagetools_06_exif_deletedata.sh
+  imagetools_06_exif_deletedata_critical.sh
+  imagetools_07_ale_stack.sh
+  imagetools_09_mtime.sh
+  01_imagetools-statistics.desktop
+  02_imagetools-dng-cr2.desktop
+  03_imagetools-mlv.desktop
+  04_imagetools-jpg-png.desktop
+  05_imagetools-imagestack.desktop
+)
 #xwinkill) #Workaround for bug: https://sourceforge.net/p/gnuplot/bugs/1659/
-depends=('magiclantern-tools' 'perl-image-exiftool' 'ale' 'dcraw' 'netpbm' 'gnuplot' 'coreutils' 'dolphin')
-optdepends=()
-conflicts=()
-makedepends=()
 
-md5sums=('b4c1f2f5906a56c5cd5404415b26ad5b'
-         'a84bf74fb67a5f6f2289ebee2ce4452e'
-         '6e81d48727e7fc6922a2aed0ce7810c1'
+depends=(
+  magiclantern-tools
+  perl-image-exiftool
+  ale
+  dcraw
+  netpbm
+  gnuplot
+  coreutils
+  dolphin
+)
+
+md5sums=('a4e9c260727723ebfecf986586c34880'
+         '758c9cc2ecc858350e041504f7d7ea12'
+         'cdc5c555acb2b96411e16cfa9ea2f25d'
          'a7e0c36553ff59d182460a2108163798'
          '01756513818969a07ff61a1ee648106b'
          '75588a9f375ac5c6f6f245d12cc315d5'
          'c294e69b9f6e714a307306fd4301fd61'
          '88cbadd0f290c737f7f0660a7029029d'
+         '2b239ca3efac3713004635d29798b44d'
          '93bb82eec8ead83b5b5369822d44d780'
-         '940848e05d6c6400eac97a998fb0f26b'
+         'a3e7650c1cbfd8d113f57f60d8699c6b'
          'be883bb11a24c4f7ac6452f3cab6cf66'
-         '9170a5e116fc2eede5325d0a985931dc'
+         'b42063458ada3002666280a5b06b1e92'
          '531f2b73b8514430a772a61a10de097f')
 
 package() {
+
     mkdir -p $pkgdir/usr/share/kservices5/ServiceMenus/
-    cp $srcdir/{imagetools_01_exif_statistics.sh,imagetools_02_dualiso.sh,imagetools_03_raw_resolution-baseline.sh,imagetools_04_mlvdump.sh,imagetools_05_mlvinfo.sh,imagetools_06_exif_deletedata.sh,imagetools_06_exif_deletedata_critical.sh,imagetools_07_ale_stack.sh,01_imagetools-statistics.desktop,02_imagetools-dng-cr2.desktop,03_imagetools-mlv.desktop,04_imagetools-jpg-png.desktop,05_imagetools-imagestack.desktop} $pkgdir/usr/share/kservices5/ServiceMenus/
-    chmod 755 $pkgdir/usr/share/kservices5/ServiceMenus/{imagetools_01_exif_statistics.sh,imagetools_02_dualiso.sh,imagetools_03_raw_resolution-baseline.sh,imagetools_04_mlvdump.sh,imagetools_05_mlvinfo.sh,imagetools_06_exif_deletedata.sh,imagetools_06_exif_deletedata_critical.sh,imagetools_07_ale_stack.sh,01_imagetools-statistics.desktop,02_imagetools-dng-cr2.desktop,03_imagetools-mlv.desktop,04_imagetools-jpg-png.desktop,05_imagetools-imagestack.desktop}
+
+    for t in sh desktop; do
+      for f in ${srcdir}/*.${t}; do
+        cp ${f} $pkgdir/usr/share/kservices5/ServiceMenus/
+      done
+    done
+
+    find $pkgdir/usr/share/kservices5/ServiceMenus/ -type f -iname "*.sh" -exec chmod 755 {} \;
+
     #chmod +x $pkgdir/usr/share/kservices5/ServiceMenus/xwinkill
 }

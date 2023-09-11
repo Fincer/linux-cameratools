@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/env bash
 
 #    Stack TIFF images with Anti-Lamenessing Engine (ALE)
-#    Copyright (C) 2017  Pekka Helenius
+#    Copyright (C) 2017,2023  Pekka Helenius
 #
 #    This program is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU General Public License
@@ -19,15 +19,17 @@
 #
 ###############################################
 
-#We get the directory just from the first filename. Pwd should be easier, but bugged, so...
-INPUT_DIR=$(dirname $1)
+# We get the directory just from the first filename.
+INPUT_DIR=$(dirname "${1}")
 
-#First & Last file names (without suffixes)
-for last; do true; done
-FIRST=$(basename $1 | cut -f 1 -d '.' | sed 's/IMG_//g') #Name of the first file passed into the script
-LAST=$(basename $last | cut -f 1 -d '.' | sed 's/IMG_//g') #Name of the last file passed into the script
+# First & Last file names (without suffixes)
+for _LAST; do true; done
 
+# Name of the first file passed into the script.
+FIRST=$(basename "${1}" | cut -f 1 -d '.' | sed 's/IMG_//g')
 
+# Name of the last file passed into the script.
+LAST=$(basename "${_LAST}" | cut -f 1 -d '.' | sed 's/IMG_//g')
 
-echo 'Starting image stacking process using temporary TIFF files.' && \
+echo "Starting image stacking process using temporary TIFF files."
 ale ./temp_tiff/*.tiff output.tif

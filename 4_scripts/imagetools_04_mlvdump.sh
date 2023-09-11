@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/env bash
 
 #    Extract DNG frames from Magic Lantern MLV files (KDE/Plasma DE)
-#    Copyright (C) 2017  Pekka Helenius
+#    Copyright (C) 2017,2023  Pekka Helenius
 #
 #    This program is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU General Public License
@@ -19,16 +19,21 @@
 #
 ###############################################
 
-#We get the directory just from the first filename. Pwd should be easier, but bugged, so...
-INPUT_DIR=$(dirname $1)
+# We get the directory just from the first filename.
+INPUT_DIR=$(dirname "${1}")
 
-mkdir -p $INPUT_DIR/mlv_export
+mkdir -p "${INPUT_DIR}/mlv_export"
 
-while [ $# -gt 0 ]; do
-    MLV=$1
-    mlv_dump --dng $MLV -o ${MLV}_
-    mv ????????.MLV_??????.dng $INPUT_DIR/mlv_export
-    shift
+while [[ $# -gt 0 ]]
+do
+  MLV_FILE="${1}"
+  mlv_dump --dng "${MLV_FILE}" -o "${MLV_FILE}_"
+  mv ????????.MLV_??????.dng "${INPUT_DIR}/mlv_export"
+
+  # Move to the next file.
+  shift
 done
 
-kdialog --msgbox "MLV extracted successfully" --title "MLV Extraction";
+kdialog \
+  --msgbox "MLV extracted successfully" \
+  --title "MLV Extraction";
