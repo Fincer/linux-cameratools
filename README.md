@@ -1,3 +1,7 @@
+**Update -- May, 2024**
+
+- **WARNING**: Some of these tools may break due to internal changes in `exiftool` (`perl-image-exiftool`). Tools work as intended at least with `exiftool` version `11.70` but not with `12.76`.
+
 # Linux camera tools for Canon DSLR owners
 
 - main target group:
