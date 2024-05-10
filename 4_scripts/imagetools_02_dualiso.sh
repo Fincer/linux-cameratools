@@ -46,6 +46,7 @@ while \
 do
 
   INPUT="${1}"
+  INPUT_MTIME=$(stat -c "%Y" "${INPUT}")
   OLDFILE_CR2=$(basename "${INPUT}")
 
   # Once we do this, it's very clear which kind of CR2 file we're talking about here.
@@ -82,6 +83,8 @@ do
       # Add Subject=Dual-ISO tag for every Dual ISO CR2 file.
       echo "Writing new EXIF/XMP tag Subject: Dual ISO CR2"
       exiftool -xmp:subject="Dual ISO CR2" "${INPUT_DIR}/${NEWFILE_CR2}" -overwrite_original
+      touch --date=@"${INPUT_MTIME}" "${INPUT_DIR}/${NEWFILE_CR2}"
+      touch --date=@"${INPUT_MTIME}" "${INPUT_DIR}/converted_dual_iso/${NEWFILE_DNG}"
 
     fi
   fi

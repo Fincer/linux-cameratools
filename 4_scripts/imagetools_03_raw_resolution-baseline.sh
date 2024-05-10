@@ -59,6 +59,7 @@ do
   # Values that change during the while loop (differ from file to file)
 
   INPUT="${1}"
+  INPUT_MTIME=$(stat -c "%Y" "${INPUT}")
 
   INPUT_BASENAME=$(basename "${INPUT}" | cut -f 1 -d '.')
 
@@ -476,6 +477,7 @@ do
   mv "${INPUT}" "${NEWFILE}"
 
   exiftool '-FileName<DateTimeOriginal' -d '%Y%m%d-%f%%-c.%%e' "${NEWFILE}"
+  #touch --date=@"${INPUT_MTIME}" "${NEWFILE}"
 
   if [[ "${2}" != "" ]]; then
     echo "Moving to the next file."
