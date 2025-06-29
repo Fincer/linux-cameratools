@@ -1,7 +1,10 @@
 #!/bin/env bash
 
+set -e
+set -u
+
 #    Stack TIFF images with Anti-Lamenessing Engine (ALE)
-#    Copyright (C) 2017,2023  Pekka Helenius
+#    Copyright (C) 2017, 2023, 2025  Pekka Helenius
 #
 #    This program is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU General Public License
@@ -33,3 +36,5 @@ LAST=$(basename "${_LAST}" | cut -f 1 -d '.' | sed 's/IMG_//g')
 
 echo "Starting image stacking process using temporary TIFF files."
 ale ./temp_tiff/*.tiff output.tif
+
+exit 0
