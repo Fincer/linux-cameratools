@@ -1,7 +1,7 @@
 #!/bin/env bash
 
 #    Delete all exif metadata from selected images with Exiftool
-#    Copyright (C) 2017,2023  Pekka Helenius
+#    Copyright (C) 2017, 2023, 2025  Pekka Helenius
 #
 #    This program is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU General Public License
@@ -22,32 +22,34 @@
 # We get the directory just from the first filename.
 INPUT_DIR=$(dirname "${1}")
 
-mkdir -p "${INPUT_DIR}"/nometadata
+mkdir -p "${INPUT_DIR}"/no_metadata
 
-#kdialog --yesnocancel "Do you really want to delete EXIF data for the selection?";
+on_exit() {
+  # If there are no files, we delete no_metadata folder
+  if [[ $(ls -w1 "${INPUT_DIR}/no_metadata" | wc -l) -eq 0 ]]
+  then
+    rm -Rf "${INPUT_DIR}/no_metadata"
+  fi
+}
 
-#if [[ "$?" = 0 ]]
-#then
-  while [[ $# -gt 0 ]]
-  do
+trap on_exit ERR EXIT
 
-    # Get the correct file extension for an input file, to be used for the new file.
-    EXTENSION=$(echo "${1}" | rev | cut -f 1 -d '.' | rev)
+############################################################################################
 
-    OLDFILE=$(basename "${1}" | sed "s/\.\w*$/.$EXTENSION/")
-    NEWFILE=$(basename "$OLDFILE" | sed "s/\.\w*$/_nometadata.$EXTENSION/")
+while [[ $# -gt 0 ]]
+do
 
-    exiftool -all= "${INPUT_DIR}/${OLDFILE}" -o "${INPUT_DIR}/nometadata/${NEWFILE}"
+  # Get the correct file extension for an input file, to be used for the new file.
+  EXTENSION=$(echo "${1}" | rev | cut -f 1 -d '.' | rev)
 
-    # Move to the next file.
-    shift
-  done
-# else
-#   exit 0
-# fi
+  OLD_FILE=$(basename "${1}" | sed "s/\.\w*$/.$EXTENSION/")
+  NEW_FILE=$(basename "${OLD_FILE}" | sed "s/\.\w*$/_no_metadata.$EXTENSION/")
 
-# Delete empty metadata folder.
-if [[ $(ls "${INPUT_DIR}/nometadata/" | wc -l) == 0 ]]
-then
-  rm -Rf "${INPUT_DIR}/nometadata/"
-fi
+  exiftool -all= "${INPUT_DIR}/${OLD_FILE}" -o "${INPUT_DIR}/no_metadata/${NEW_FILE}"
+
+  # Move to the next file.
+  shift
+
+done
+
+exit 0
