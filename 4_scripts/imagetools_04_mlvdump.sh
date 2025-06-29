@@ -1,7 +1,10 @@
 #!/bin/env bash
 
+# set -e
+# set -u
+
 #    Extract DNG frames from Magic Lantern MLV files (KDE/Plasma DE)
-#    Copyright (C) 2017,2023  Pekka Helenius
+#    Copyright (C) 2017, 2023, 2025  Pekka Helenius
 #
 #    This program is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU General Public License
@@ -24,6 +27,18 @@ INPUT_DIR=$(dirname "${1}")
 
 mkdir -p "${INPUT_DIR}/mlv_export"
 
+on_exit() {
+  # If there are no files, we delete mlv_export folder
+  if [[ $(ls -w1 "${INPUT_DIR}/mlv_export" | wc -l) -eq 0 ]]
+  then
+    rm -Rf "${INPUT_DIR}/mlv_export"
+  fi
+}
+
+trap on_exit ERR EXIT
+
+############################################################################################
+
 while [[ $# -gt 0 ]]
 do
   MLV_FILE="${1}"
@@ -36,4 +51,6 @@ done
 
 kdialog \
   --msgbox "MLV extracted successfully" \
-  --title "MLV Extraction";
+  --title "MLV Extraction"
+
+exit 0
