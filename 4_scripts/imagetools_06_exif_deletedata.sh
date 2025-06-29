@@ -1,5 +1,8 @@
 #!/bin/env bash
 
+# set -e
+# set -u
+
 #    Delete all exif metadata from selected images with Exiftool
 #    Copyright (C) 2017, 2023, 2025  Pekka Helenius
 #
