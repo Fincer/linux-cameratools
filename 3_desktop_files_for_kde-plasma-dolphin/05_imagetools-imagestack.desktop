@@ -11,4 +11,4 @@ X-KDE-Submenu=Image Tools
 [Desktop Action ale_imagestack]
 Name=Stack TIFF images
 Icon=application-exit
-Exec=/usr/share/kservices5/ServiceMenus/imagetools_07_ale_stack.sh %f
+Exec=/usr/share/kio/servicemenus/imagetools_07_ale_stack.sh %f

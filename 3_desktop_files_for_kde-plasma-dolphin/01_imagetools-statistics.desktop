@@ -11,4 +11,4 @@ X-KDE-Submenu=Image Tools
 [Desktop Action statistics]
 Name=Statistics
 Icon=application-x-theme
-Exec=/usr/share/kservices5/ServiceMenus/imagetools_01_exif_statistics.sh %F
+Exec=/usr/share/kio/servicemenus/imagetools_01_exif_statistics.sh %F
