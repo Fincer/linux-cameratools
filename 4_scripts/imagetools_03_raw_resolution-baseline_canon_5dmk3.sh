@@ -1,7 +1,7 @@
 #!/bin/env bash
 
 #    Add CR2 tags: Baseline, Subject (to distinguish Single & Dual ISOs)
-#    Copyright (C) 2017,2023  Pekka Helenius
+#    Copyright (C) 2017, 2023, 2025  Pekka Helenius
 #
 #    This program is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU General Public License
@@ -27,8 +27,6 @@ DIR_BASENAME=$(echo "${INPUT_DIR}" | rev | cut -d/ -f 1 | rev)
 C5DMK3_WIDTH=5796
 C5DMK3_HEIGHT=3870
 
-# In a case or emergency (can't open a picture etc), revert these values to 5760 x 3840.
-
 ################################################################################################
 
 # PROGRESSBAR CODE - BEGIN
@@ -47,6 +45,9 @@ dbusRef=$(
 
 qdbus $dbusRef showCancelButton true
 
+qdbus $dbusRef Set "" "value" "0"
+qdbus $dbusRef setLabelText "$LABELTEXT (0/${numargs})"
+
 # PROGRESSBAR CODE - END
 
 while \
@@ -54,31 +55,42 @@ while \
   [[ $(qdbus $dbusRef wasCancelled) == "false" ]]
 do
 
+  # PROGRESSBAR CODE - BEGIN
+
+  let inc++
+
+  # Percentage needs to be calculated like this due to bash rounding limitations.
+  PERCENT_VALUE=$(((${mltp}*${tics})/(200*${numargs}/${inc} % 2 + ${mltp}*${numargs}/${inc})))
+  # Output: 20, 40, 59, 80, 100 etc.
+
+  qdbus $dbusRef Set "" "value" "${PERCENT_VALUE}";
+  qdbus $dbusRef setLabelText "${LABELTEXT} (${inc}/${numargs})";
+
+  # PROGRESSBAR CODE - END
+
 ################################################################
 
   # Values that change during the while loop (differ from file to file)
 
   INPUT="${1}"
-  INPUT_MTIME=$(stat -c "%Y" "${INPUT}")
 
-  INPUT_BASENAME=$(basename "${INPUT}" | cut -f 1 -d '.')
+  # Get original modification time
+  MTIME=$(exiftool -d "%s" -DateTimeOriginal -s -S "${INPUT}")
+
+  INPUT_BASENAME_NO_EXT=$(basename "${INPUT}" | cut -f 1 -d '.')
 
   # Get the correct file extension for an input file, to be used for the new file.
-  INPUT_EXTENSION=$(echo $(basename "${INPUT}" | cut -f 2 -d '.' | sed -e '/^\s*$/d' -e 's/\(.*\)/\U\1/'))
+  INPUT_EXTENSION=$(basename "${INPUT}" | sed -r 's/.*\.(\w*)$/\U\1/')
 
-  SUBJECT=$(exiftool "${INPUT}" | grep "Subject")
-  SUBJECT_SINGLEISO=$(exiftool "${INPUT}" | grep "Subject" | grep "Single ISO")
-  SUBJECT_DUALISO=$(exiftool "${INPUT}" | grep "Subject" | grep "Dual ISO")
+  SUBJECT=$(exiftool "${INPUT}" | grep -iE "^Subject" || true)
+  SUBJECT_SINGLEISO=$(exiftool "${INPUT}" | grep -iE "^Subject.*Single ISO CR2" || true)
+  SUBJECT_DUALISO=$(exiftool "${INPUT}" | grep -iE "^Subject.*Dual ISO CR2" || true)
 
-  # This is just for compatibility.
-  SUBJECT_DUALISO_OLD=$(exiftool "${INPUT}" | grep "Subject" | grep "Dual-ISO")
+  BASELINES=$(exiftool "${INPUT}" | grep -iE "^Baseline Exposure")
 
-  BASELINES=$(exiftool "${INPUT}" | grep "Baseline Exposure")
-
-  C5DMK3_CHECK=$(exiftool "${INPUT}" |grep -i "5D Mark III" |wc -l)
-  CROPHEIGHT_CHECK_VALUE=$(echo -n $(exiftool "${INPUT}" |grep -i "Cropped Image Height" | sed 's/[^0-9]*//g'))
-
-  ISO_VALUE=$(echo -n $(exiftool "${INPUT}" | grep "Recommended Exposure Index" | grep -v "Sensitivity Type" | sed 's/[^0-9]*//g'))
+  C5DMK3_CHECK=$(exiftool "${INPUT}" |grep -i "5D Mark III" | wc -l)
+  CROPHEIGHT_CHECK_VALUE=$(printf '%d' $(exiftool "${INPUT}" | awk -F: 'BEGIN{IGNORECASE=1}/^Cropped Image Height\s+:/ { {gsub(/[^0-9]+/,"",$2); print $2} }'))
+  ISO_VALUE=$(printf '%d' $(exiftool "${INPUT}" | awk -F: 'BEGIN{IGNORECASE=1}/^Recommended Exposure Index\s+:/ { {gsub(/[^0-9]+/,"",$2); print $2} }'))
 
 ################################################################
 
@@ -89,17 +101,17 @@ do
   #
   # Input file is CR2 or cr2
 
-  if [[ "${INPUT_EXTENSION}" == "CR2" ]]
+  if [[ $(file -b --mime-type "${INPUT}" | tr '[:upper:]' '[:lower:]') == "image/x-canon-cr2" ]]
   then
+
+    IS_SINGLE_CR2=true
 
     # Dual ISO - unprocessed CR2 (NOTE: THIS CHECK IS SLOW)
     # Test an input file for Dual ISO.
-    if [[ $(cr2hdr --dry-run "${INPUT}" | grep "Interlaced ISO detected" | wc -l) -eq 1 ]]
+    if [[ $(cr2hdr --dry-run "${INPUT}") =~ Interlaced\ ISO\ detected ]]
     then
-      echo "${INPUT_BASENAME}: Dual ISO CR2 image. Skipping."
+      echo "${INPUT_BASENAME_NO_EXT}: Dual ISO CR2 image. Skipping."
       IS_SINGLE_CR2=false
-    else
-      IS_SINGLE_CR2=true
     fi
 
     # Single ISO - CR2
@@ -107,33 +119,33 @@ do
     then
 
       # Subject Tag
-      if [[ $(echo "${SUBJECT}" | sed '/^\s*$/d' | wc -l) -eq 0 ]]
+      if [[ -z "${SUBJECT}" ]]
       then
-        echo "${INPUT_BASENAME}: Add a new Subject tag."
+        echo "${INPUT_BASENAME_NO_EXT}: Add a new Subject tag."
         SUBJECT_TAG="Single ISO CR2"
         PROCESS_SUBJECT=true
       else
-        echo "${INPUT_BASENAME} is a Single ISO image and has a Subject tag already."
+        echo "${INPUT_BASENAME_NO_EXT} is a Single ISO image and has a Subject tag already."
         PROCESS_SUBJECT=false
       fi
 
       # Baseline Tags
-      if [[ $(echo "${BASELINES}" | sed '/^\s*$/d' | wc -l) -eq 0 ]]
+      if [[ -z "${BASELINES}" ]]
       then
-        echo "${INPUT_BASENAME}: Add new Baseline tags."
+        echo "${INPUT_BASENAME_NO_EXT}: Add new Baseline tags."
         PROCESS_BASELINE=true
       else
-        echo "${INPUT_BASENAME}: Baseline tags exist. Skipping."
+        echo "${INPUT_BASENAME_NO_EXT}: Baseline tags exist. Skipping."
         PROCESS_BASELINE=false
       fi
 
       # Image size
       if [[ "${CROPHEIGHT_CHECK_VALUE}" -ne "${C5DMK3_HEIGHT}" ]]
       then
-        echo "${INPUT_BASENAME}: New resolution, ${C5DMK3_WIDTH} x ${C5DMK3_HEIGHT}."
+        echo "${INPUT_BASENAME_NO_EXT}: New resolution, ${C5DMK3_WIDTH} x ${C5DMK3_HEIGHT}."
         PROCESS_SIZE=true
       else
-        echo "${INPUT_BASENAME}: Has correct resolution already."
+        echo "${INPUT_BASENAME_NO_EXT}: Has correct resolution already."
         PROCESS_SIZE=false
       fi
 
@@ -144,16 +156,18 @@ do
   #
   # Input file is DNG or dng
 
-  elif [[ "${INPUT_EXTENSION}" == "DNG" ]]
+  elif \
+    [[ "${INPUT_EXTENSION}" == "DNG" ]] &&
+    [[ $(file -b --mime-type "${INPUT}" | tr '[:upper:]' '[:lower:]') == "image/tiff" ]]
   then
 
     ###########
     # DNG with missing Subject Tag
 
-    if [[ $(echo "${SUBJECT}" | sed '/^\s*$/d' | wc -l) -eq 0 ]]
+    if [[ -z "${SUBJECT}" ]]
     then
 
-      echo "${INPUT_BASENAME}: Add a new Subject tag."
+      echo "${INPUT_BASENAME_NO_EXT}: Add a new Subject tag."
       SUBJECT_TAG="Single ISO CR2"
       PROCESS_SUBJECT=true
 
@@ -163,11 +177,12 @@ do
       PROCESS_BASELINE=false
 
     ###########
-    # DNG with updated Subject Tag
+    # Single ISO
 
-    elif [[ $(echo "${SUBJECT_SINGLEISO}" | sed '/^\s*$/d' | wc -l) -ne 0 ]]
+    elif [[ ! -z "${SUBJECT_SINGLEISO}" ]]
     then
-      echo "${INPUT_BASENAME}: Subject tag exists. Skipping."
+
+      echo "${INPUT_BASENAME_NO_EXT}: Subject tag exists. Skipping."
       PROCESS_SUBJECT=false
 
       # We don't update size tags. See reason below.
@@ -176,34 +191,17 @@ do
       PROCESS_BASELINE=false
 
     ###########
-    # New Dual ISO - DNG
+    # Dual ISO
 
-    elif [[ $(echo "${SUBJECT_DUALISO}" | sed '/^\s*$/d' | wc -l) -ne 0 ]]
+    elif [[ ! -z "${SUBJECT_DUALISO}" ]]
     then
 
-      echo "${INPUT_BASENAME}: Dual ISO image with proper tags. Skipping."
+      echo "${INPUT_BASENAME_NO_EXT}: Dual ISO image with proper tags. Skipping."
 
       # Tags have already be written by updated cr2hdr.
       PROCESS_SUBJECT=false
       PROCESS_SIZE=false
       PROCESS_BASELINE=false
-
-    ###########
-    # Old Dual ISO - DNG
-
-    elif [[ $(echo "${SUBJECT_DUALISO_OLD}" | sed '/^\s*$/d' | wc -l) -ne 0 ]]
-    then
-
-      echo "${INPUT_BASENAME}: old Dual ISO image. Update Subject & Baseline tags."
-      exiftool -xmp:subject= "${INPUT}" -overwrite_original #Clear old tag
-
-      PROCESS_SUBJECT=true
-      SUBJECT_TAG="Dual ISO DNG"
-
-      PROCESS_SIZE=false
-
-      # Old dual ISOs don't have this one.
-      PROCESS_BASELINE=true
 
     fi
   fi
@@ -222,7 +220,7 @@ do
     [[ "${PROCESS_BASELINE}" == false ]] && \
     [[ "${PROCESS_SIZE}"     == false ]]
   then
-      SUFFIX=
+    SUFFIX=
 
   # true, true, true
   elif \
@@ -230,7 +228,7 @@ do
     [[ "${PROCESS_BASELINE}" == true ]] && \
     [[ "${PROCESS_SIZE}"     == true ]]
   then
-      SUFFIX=_USB
+    SUFFIX=_USB
 
   # true, true, false
   elif \
@@ -238,7 +236,7 @@ do
     [[ "${PROCESS_BASELINE}" == true  ]] && \
     [[ "${PROCESS_SIZE}"     == false ]]
   then
-      SUFFIX=_SB
+    SUFFIX=_SB
 
   # false, true, true
   elif \
@@ -246,7 +244,7 @@ do
     [[ "${PROCESS_BASELINE}" == true  ]] && \
     [[ "${PROCESS_SIZE}"     == true  ]]
   then
-      SUFFIX=_UB
+    SUFFIX=_UB
 
   # true, false, true
   elif \
@@ -254,7 +252,7 @@ do
     [[ "${PROCESS_BASELINE}" == false ]] && \
     [[ "${PROCESS_SIZE}"     == true  ]]
   then
-      SUFFIX=_US
+    SUFFIX=_US
 
   # false, true, false
   elif \
@@ -262,7 +260,7 @@ do
     [[ "${PROCESS_BASELINE}" == true  ]] && \
     [[ "${PROCESS_SIZE}"     == false ]]
   then
-      SUFFIX=_B
+    SUFFIX=_B
 
   # true, false, false
   elif \
@@ -270,7 +268,7 @@ do
     [[ "${PROCESS_BASELINE}" == false ]] && \
     [[ "${PROCESS_SIZE}"     == false ]]
   then
-      SUFFIX=_S
+    SUFFIX=_S
 
   # false, false, true
   elif \
@@ -278,7 +276,7 @@ do
     [[ "${PROCESS_BASELINE}" == false ]] && \
     [[ "${PROCESS_SIZE}"     == true  ]]
   then
-      SUFFIX=_U
+    SUFFIX=_U
 
   fi
 
@@ -323,7 +321,7 @@ do
       "${INPUT}" \
       -overwrite_original
 
-    echo -e "${INPUT_BASENAME}: Image dimensions updated to ${C5DMK3_WIDTH} x ${C5DMK3_HEIGHT}.\n"
+    echo -e "${INPUT_BASENAME_NO_EXT}: Image dimensions updated to ${C5DMK3_WIDTH} x ${C5DMK3_HEIGHT}.\n"
 
     # Other useful Height/Width tags are as follows:
 
@@ -422,8 +420,8 @@ do
       BL_EXP=0.02
 
     elif \
-      [[ "$ISO_VALUE}" -eq 51200 ]] || \
-      [[ "$ISO_VALUE}" -eq 102400 ]]
+      [[ "${ISO_VALUE}" -eq 51200 ]] || \
+      [[ "${ISO_VALUE}" -eq 102400 ]]
     then
       BL_EXP=0.36
 
@@ -450,7 +448,7 @@ do
       "${INPUT}" \
       -overwrite_original
 
-    echo -e "${INPUT_BASENAME}: Baseline tags added.\n"
+    echo -e "${INPUT_BASENAME_NO_EXT}: Baseline tags added.\n"
 
   fi
 
@@ -463,43 +461,54 @@ do
     [[ "${C5DMK3_CHECK}" -ne 0 ]]
   then
     exiftool -xmp:subject="${SUBJECT_TAG}" "${INPUT}" -overwrite_original
-    echo -e "${INPUT_BASENAME}: New Subject tag added: $SUBJECT_TAG\n"
+    echo -e "${INPUT_BASENAME_NO_EXT}: New Subject tag added: ${SUBJECT_TAG}\n"
   fi
 
 ################################################################
 
   # FILE SUFFIX ADDITION
 
+  # Restore original modification time.
   exiftool "-FileModifyDate<EXIF:DateTimeOriginal" "${INPUT}"
 
-  NEWFILE="${INPUT_DIR}"/"${INPUT_BASENAME}${SUFFIX}"."${INPUT_EXTENSION}"
+  NEW_FILE="${INPUT_DIR}/${INPUT_BASENAME_NO_EXT}${SUFFIX}"."${INPUT_EXTENSION}"
+  NEW_FILE_BASENAME_NO_TIMESTAMP=$(basename "${NEW_FILE}" | sed -r 's/^[0-9]{8}-//')
 
-  mv "${INPUT}" "${NEWFILE}"
+  # Continue, if INPUT and NEW_FILE refer to the same inode
+  # (is the same file).
+  if [[ $(stat -c "%i" "${INPUT}") -eq $(stat -c "%i" "${NEW_FILE}") ]]
+  then
+    shift
+    continue
+  fi
 
-  exiftool '-FileName<DateTimeOriginal' -d '%Y%m%d-%f%%-c.%%e' "${NEWFILE}"
-  #touch --date=@"${INPUT_MTIME}" "${NEWFILE}"
+  mv -f "${INPUT}" "${NEW_FILE}"
 
-  if [[ "${2}" != "" ]]; then
-    echo "Moving to the next file."
+  NEW_FILE_TIMESTAMP=$(date -d "$(exiftool "${INPUT}" | grep --max-count=1 -oP "(?<=Date\/Time Original).*" | awk '{$1=""; gsub(/^\s+/,"",$0); gsub(/:/,"-", $1); print}')" +"%Y%m%d")
+
+  if [[ -z ${NEW_FILE_TIMESTAMP} ]]
+  then
+    shift
+    continue
+  fi
+
+  if [[ ! -f "${INPUT_DIR}/${NEW_FILE_TIMESTAMP}-${NEW_FILE_BASENAME_NO_TIMESTAMP}" ]]
+  then
+    # Rename the new file with proper datetime prefix.
+    exiftool '-FileName<DateTimeOriginal' -d '%Y%m%d-%f%%-c.%%e' "${NEW_FILE}"
+  else
+    # Restore original modification time.
+    if [[ ! -z "${MTIME}" ]]
+    then
+      touch --date=@${MTIME} "${NEW_FILE}"
+    fi
   fi
 
 ################################################################
 
-  # PROGRESSBAR CODE - BEGIN
-
-  let inc++
-
-  # Percentage needs to be calculated like this due to bash rounding limitations.
-  PERCENT_VALUE=$(((${mltp}*${tics})/(200*${numargs}/${inc} % 2 + ${mltp}*${numargs}/${inc})))
-  # Output: 20, 40, 59, 80, 100 etc.
-
-  qdbus $dbusRef Set "" "value" "${PERCENT_VALUE}";
-  qdbus $dbusRef setLabelText "${LABELTEXT} (${inc}/${numargs})";
-
-  # PROGRESSBAR CODE - END
-
   # Move to the next file.
   shift
+
 done
 
 ##############################################
