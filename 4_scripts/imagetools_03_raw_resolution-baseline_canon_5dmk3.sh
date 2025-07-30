@@ -110,46 +110,48 @@ do
     # Test an input file for Dual ISO.
     if [[ $(cr2hdr --dry-run "${INPUT}") =~ Interlaced\ ISO\ detected ]]
     then
-      echo "${INPUT_BASENAME_NO_EXT}: Dual ISO CR2 image. Skipping."
+      echo "${INPUT_BASENAME_NO_EXT}: Dual ISO CR2 image."
       IS_SINGLE_CR2=false
     fi
 
-    # Single ISO - CR2
-    if [[ "${IS_SINGLE_CR2}" == true ]]
+    # Subject Tag
+    if [[ -z "${SUBJECT}" ]]
     then
+      echo "${INPUT_BASENAME_NO_EXT}: Add a new Subject tag."
 
-      # Subject Tag
-      if [[ -z "${SUBJECT}" ]]
+      if [[ "${IS_SINGLE_CR2}" == true ]]
       then
-        echo "${INPUT_BASENAME_NO_EXT}: Add a new Subject tag."
         SUBJECT_TAG="Single ISO CR2"
-        PROCESS_SUBJECT=true
       else
-        echo "${INPUT_BASENAME_NO_EXT} is a Single ISO image and has a Subject tag already."
-        PROCESS_SUBJECT=false
+        SUBJECT_TAG="Dual ISO CR2"
       fi
 
-      # Baseline Tags
-      if [[ -z "${BASELINES}" ]]
-      then
-        echo "${INPUT_BASENAME_NO_EXT}: Add new Baseline tags."
-        PROCESS_BASELINE=true
-      else
-        echo "${INPUT_BASENAME_NO_EXT}: Baseline tags exist. Skipping."
-        PROCESS_BASELINE=false
-      fi
-
-      # Image size
-      if [[ "${CROPHEIGHT_CHECK_VALUE}" -ne "${C5DMK3_HEIGHT}" ]]
-      then
-        echo "${INPUT_BASENAME_NO_EXT}: New resolution, ${C5DMK3_WIDTH} x ${C5DMK3_HEIGHT}."
-        PROCESS_SIZE=true
-      else
-        echo "${INPUT_BASENAME_NO_EXT}: Has correct resolution already."
-        PROCESS_SIZE=false
-      fi
-
+      PROCESS_SUBJECT=true
+    else
+      #echo "${INPUT_BASENAME_NO_EXT} is a Single ISO image and has a Subject tag already."
+      PROCESS_SUBJECT=false
     fi
+
+    # Baseline Tags
+    if [[ -z "${BASELINES}" ]]
+    then
+      echo "${INPUT_BASENAME_NO_EXT}: Add new Baseline tags."
+      PROCESS_BASELINE=true
+    else
+      echo "${INPUT_BASENAME_NO_EXT}: Baseline tags exist. Skipping."
+      PROCESS_BASELINE=false
+    fi
+
+    # Image size
+    if [[ "${CROPHEIGHT_CHECK_VALUE}" -ne "${C5DMK3_HEIGHT}" ]]
+    then
+      echo "${INPUT_BASENAME_NO_EXT}: New resolution, ${C5DMK3_WIDTH} x ${C5DMK3_HEIGHT}."
+      PROCESS_SIZE=true
+    else
+      echo "${INPUT_BASENAME_NO_EXT}: Has correct resolution already."
+      PROCESS_SIZE=false
+    fi
+
 
   ################################
   # DNG FILES
@@ -167,7 +169,7 @@ do
     if [[ -z "${SUBJECT}" ]]
     then
 
-      echo "${INPUT_BASENAME_NO_EXT}: Add a new Subject tag."
+      #echo "${INPUT_BASENAME_NO_EXT}: Add a new Subject tag."
       SUBJECT_TAG="Single ISO CR2"
       PROCESS_SUBJECT=true
 
@@ -182,7 +184,7 @@ do
     elif [[ ! -z "${SUBJECT_SINGLEISO}" ]]
     then
 
-      echo "${INPUT_BASENAME_NO_EXT}: Subject tag exists. Skipping."
+      echo "${INPUT_BASENAME_NO_EXT}: Single ISO image with a proper tag. Skipping."
       PROCESS_SUBJECT=false
 
       # We don't update size tags. See reason below.
@@ -196,7 +198,7 @@ do
     elif [[ ! -z "${SUBJECT_DUALISO}" ]]
     then
 
-      echo "${INPUT_BASENAME_NO_EXT}: Dual ISO image with proper tags. Skipping."
+      echo "${INPUT_BASENAME_NO_EXT}: Dual ISO image with a proper tag. Skipping."
 
       # Tags have already be written by updated cr2hdr.
       PROCESS_SUBJECT=false
@@ -471,20 +473,23 @@ do
   # Restore original modification time.
   exiftool "-FileModifyDate<EXIF:DateTimeOriginal" "${INPUT}"
 
-  NEW_FILE="${INPUT_DIR}/${INPUT_BASENAME_NO_EXT}${SUFFIX}"."${INPUT_EXTENSION}"
+  NEW_FILE="${INPUT_DIR}/${INPUT_BASENAME_NO_EXT}${SUFFIX}.${INPUT_EXTENSION}"
   NEW_FILE_BASENAME_NO_TIMESTAMP=$(basename "${NEW_FILE}" | sed -r 's/^[0-9]{8}-//')
 
   # Continue, if INPUT and NEW_FILE refer to the same inode
   # (is the same file).
-  if [[ $(stat -c "%i" "${INPUT}") -eq $(stat -c "%i" "${NEW_FILE}") ]]
+  if [[ -f "${INPUT}" ]] && [[ -f "${NEW_FILE}" ]]
   then
-    shift
-    continue
+    if [[ $(stat -c "%i" "${INPUT}") -eq $(stat -c "%i" "${NEW_FILE}") ]]
+    then
+      shift
+      continue
+    fi
   fi
 
-  mv -f "${INPUT}" "${NEW_FILE}"
-
   NEW_FILE_TIMESTAMP=$(date -d "$(exiftool "${INPUT}" | grep --max-count=1 -oP "(?<=Date\/Time Original).*" | awk '{$1=""; gsub(/^\s+/,"",$0); gsub(/:/,"-", $1); print}')" +"%Y%m%d")
+
+  mv -f "${INPUT}" "${NEW_FILE}"
 
   if [[ -z ${NEW_FILE_TIMESTAMP} ]]
   then
@@ -500,7 +505,7 @@ do
     # Restore original modification time.
     if [[ ! -z "${MTIME}" ]]
     then
-      touch --date=@${MTIME} "${NEW_FILE}"
+      touch --date=@${MTIME} "${INPUT_DIR}/${NEW_FILE_TIMESTAMP}-${NEW_FILE_BASENAME_NO_TIMESTAMP}"
     fi
   fi
 
