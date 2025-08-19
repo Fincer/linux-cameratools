@@ -9,7 +9,7 @@ url='https://bitbucket.org/hudson/magic-lantern'
 license=("GPL")
 depends=('perl-image-exiftool' 'dcraw')
 optdepends=('octave')
-makedepends=('mercurial')
+makedepends=('make' 'mercurial' 'lib32-glibc' 'lib32-gcc-libs' 'which')
 
 #REQUIRED BY MODULES
 #Use these dependencies only if you try compile more modules. They rely partially on rst2html5 package.
