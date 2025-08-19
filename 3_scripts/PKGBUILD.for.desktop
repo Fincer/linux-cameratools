@@ -1,0 +1,65 @@
+pkgname=linux-imagetools
+provides=(linux-imagetools)
+pkgver=1
+pkgrel=1
+pkgdesc="Useful combination of tools for processing various images (KDE6 Dolphin action)"
+arch=('any')
+license=('GPL')
+source=(
+  imagetools_01_exif_statistics.sh
+  imagetools_02_cr2todng.sh
+  imagetools_03_raw_resolution-baseline_canon_5dmk3.sh
+  imagetools_04_mlvdump_desktop.sh
+  imagetools_05_mlvinfo_desktop.sh
+  imagetools_06_exif_deletedata.sh
+  imagetools_06_exif_deletedata_critical.sh
+  imagetools_07_ale_stack.sh
+  imagetools_09_repair_image_mtime.sh
+  01_imagetools-statistics.desktop
+  02_imagetools-dng-cr2.desktop
+  03_imagetools-mlv.desktop
+  04_imagetools-jpg-png.desktop
+  05_imagetools-imagestack.desktop
+)
+
+depends=(
+  magiclantern-tools
+  perl-image-exiftool
+  ale
+  dcraw
+  netpbm
+  gnuplot
+  coreutils
+  dolphin
+  dnglab
+)
+
+md5sums=('af8ff47782a5e0cdebab7af5ffd8bc8b'
+         '85eac2f1c90aa9c69c1ae56de509a5eb'
+         '34decae316788b307fa9bf95019f7bfd'
+         'a419e10cd36f0d4108c7aec450d2539b'
+         '861b8d571c816711ee918b1b75cc3876'
+         '336c40a4f4811e74d29a70b3e0d7731d'
+         '9e9a3fc943c508264810232ab39dd9b6'
+         '3b4f541df70a95292625edf28ed6f349'
+         'cb902e0e832508eb8cc467b31ad204db'
+         'fb81862081b7ffbbfd05168c5d28e84e'
+         'ebf6bb1626ea358272a0991910d88ad1'
+         'e5c945d3f28b827427943102a9816d50'
+         '644d651cd40c23efbbd20d14c1bf2434'
+         'a6e3a56e547a6aaec7135acfdc1d9ce1')
+
+package() {
+
+    mkdir -p "${pkgdir}/usr/bin/"
+    for i in "${srcdir}/"*.sh
+    do
+      chmod 0755 "${i}"
+      cp -p "${i}" "${pkgdir}/usr/bin/$(basename -s .sh ${i} | sed 's/imagetools_[0-9]*_//')"
+    done
+
+    mkdir -p "${pkgdir}/usr/share/kio/servicemenus/"
+    for i in "${srcdir}/"*.desktop; do
+      cp -p "${i}" "${pkgdir}/usr/share/kio/servicemenus/"
+    done
+}

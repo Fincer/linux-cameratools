@@ -34,7 +34,7 @@
 
 ### Dual ISO conversion
 
-- Convert Magic Lantern dual ISO cr2 files easily with a right-click menu entry in Dolphin file manager. 
+- Convert Magic Lantern dual ISO cr2 files easily with a right-click menu entry in Dolphin file manager.
 
 - Support for individual image and multiple images selection.
 
@@ -74,13 +74,11 @@ Source files for creating an Arch Linux package for Magic Lantern bootable SD ca
 
 Patch file for GNU Plot for better QT integration. Adds and alters some features which benefit generated statistics. Tested with GNU Plot 5.0.6.
 
-### 3_desktop_files_for_kde-plasma-dolphin
+### 3_scripts
 
-Dolphin file manager desktop integration for scripts in this repository.
+Main scripts for exporting statistics, doing image conversions, etc. + desktop files for Dolphin file manager.
 
-### 4_scripts
-
-Main scripts for exporting statistics, doing image conversions...etc.
+- Two PKGBUILD files: one for desktop systems (KDE6), and one for headless systems.
 
 ### sample_images
 

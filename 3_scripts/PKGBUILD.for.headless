@@ -1,0 +1,45 @@
+pkgname=linux-imagetools-headless
+provides=(linux-imagetools)
+pkgver=1
+pkgrel=1
+pkgdesc="Useful combination of tools for processing various images"
+arch=('any')
+license=('GPL')
+source=(
+#  imagetools_01_exif_statistics.sh
+  imagetools_02_cr2todng_headless.sh
+  imagetools_03_raw_resolution-baseline_canon_5dmk3_headless.sh
+  imagetools_04_mlvdump_headless.sh
+#  imagetools_05_mlvinfo_desktop.sh
+  imagetools_06_exif_deletedata.sh
+  imagetools_06_exif_deletedata_critical.sh
+  imagetools_07_ale_stack.sh
+  imagetools_09_repair_image_mtime.sh
+)
+
+depends=(
+  magiclantern-tools
+  perl-image-exiftool
+  ale
+  dcraw
+  netpbm
+  coreutils
+  dnglab
+)
+
+md5sums=('7b610cd51c0b06f8d1fd4be80e82769d'
+         '6da7f619d03aff2399e7d007971b99ff'
+         '22b1ac78265146394bc74edf4a5c23a0'
+         '336c40a4f4811e74d29a70b3e0d7731d'
+         '9e9a3fc943c508264810232ab39dd9b6'
+         '3b4f541df70a95292625edf28ed6f349'
+         'cb902e0e832508eb8cc467b31ad204db')
+
+package() {
+    mkdir -p "${pkgdir}/usr/bin/"
+    for i in "${srcdir}/"*.sh
+    do
+      chmod 0755 "${i}"
+      cp -p "${i}" "${pkgdir}/usr/bin/$(basename -s .sh ${i} | sed 's/imagetools_[0-9]*_//; s/_headless$//')"
+    done
+}
