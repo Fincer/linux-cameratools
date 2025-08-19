@@ -1,10 +1,10 @@
 #!/bin/env bash
 
-# set -e
-# set -u
+set -e
+set -u
 
-#    Extract DNG frames from Magic Lantern MLV files (KDE/Plasma DE)
-#    Copyright (C) 2017, 2023, 2025  Pekka Helenius
+#    Replace file mtime value with DateTimeOriginal timestamp.
+#    Copyright (C) 2025  Pekka Helenius
 #
 #    This program is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU General Public License
@@ -22,35 +22,15 @@
 #
 ###############################################
 
-# We get the directory just from the first filename.
-INPUT_DIR=$(dirname "${1}")
-
-mkdir -p "${INPUT_DIR}/mlv_export"
-
-on_exit() {
-  # If there are no files, we delete mlv_export folder
-  if [[ $(ls -w1 "${INPUT_DIR}/mlv_export" | wc -l) -eq 0 ]]
-  then
-    rm -Rf "${INPUT_DIR}/mlv_export"
-  fi
-}
-
-trap on_exit EXIT
-
-############################################################################################
-
-while [[ $# -gt 0 ]]
+for INPUT in "${@}"
 do
-  MLV_FILE="${1}"
-  mlv_dump --dng "${MLV_FILE}" -o "${MLV_FILE}_"
-  mv ????????.MLV_??????.dng "${INPUT_DIR}/mlv_export"
+    MTIME=$(exiftool -d "%s" -DateTimeOriginal -s -S "${INPUT}")
+    if [[ ! -z "${MTIME}" ]]; then
+      touch --date=@${MTIME} "${INPUT}"
+    fi
 
-  # Move to the next file.
-  shift
+    # Move to the next file.
+    shift
 done
-
-kdialog \
-  --msgbox "MLV extracted successfully" \
-  --title "MLV Extraction"
 
 exit 0

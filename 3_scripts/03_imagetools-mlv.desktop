@@ -11,7 +11,7 @@ X-KDE-Submenu=Image Tools
 [Desktop Action mlvdump]
 Name=Extract all DNG frames
 Icon=application-x-theme
-Exec=/usr/bin/mlvdump_desktop %F
+Exec=/usr/bin/mlvdump_batch_desktop %F
 
 [Desktop Action mlvinfo]
 Name=About this MLV file

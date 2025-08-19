@@ -22,25 +22,11 @@
 #
 ###############################################
 
-# We get the directory just from the first filename.
-INPUT_DIR=$(dirname "${1}")
-
-mkdir -p "${INPUT_DIR}"/no_critical_metadata
-
-on_exit() {
-  # If there are no files, we delete no_critical_metadata folder
-  if [[ $(ls -w1 "${INPUT_DIR}/no_critical_metadata" | wc -l) -eq 0 ]]
-  then
-    rm -Rf "${INPUT_DIR}/no_critical_metadata"
-  fi
-}
-
-trap on_exit EXIT
-
-############################################################################################
-
-while [[ $# -gt 0 ]]
+for INPUT in "${@}"
 do
+
+  INPUT_DIR=$(dirname "${INPUT}")
+  mkdir -p "${INPUT_DIR}"/no_critical_metadata
 
   # Get the correct file extension for an input file, to be used for the new file.
   EXTENSION=$(echo "${1}" | rev | cut -f 1 -d '.' | rev)

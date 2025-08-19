@@ -1,10 +1,10 @@
 #!/bin/env bash
 
-set -e
-set -u
+# set -e
+# set -u
 
-#    Replace file mtime value with DateTimeOriginal timestamp.
-#    Copyright (C) 2025  Pekka Helenius
+#    Extract DNG frames from Magic Lantern MLV files (KDE/Plasma DE)
+#    Copyright (C) 2017, 2023, 2025  Pekka Helenius
 #
 #    This program is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU General Public License
@@ -22,16 +22,23 @@ set -u
 #
 ###############################################
 
-while [[ $# -gt 0 ]]
+for INPUT in "${@}"
 do
-    INPUT="${1}"
-    MTIME=$(exiftool -d "%s" -DateTimeOriginal -s -S "${INPUT}")
-    if [[ ! -z "${MTIME}" ]]; then
-      touch --date=@${MTIME} "${INPUT}"
-    fi
+  MLV_FILE="${INPUT}"
+  INPUT_DIR=$(dirname "${INPUT}")
 
-    # Move to the next file.
-    shift
+  mkdir -p "${INPUT_DIR}/mlv_export"
+
+  mlv_dump --dng "${MLV_FILE}" -o "${MLV_FILE}_"
+  mv ????????.MLV_??????.dng "${INPUT_DIR}/mlv_export"
+
+  # Move to the next file.
+  shift
+
 done
+
+kdialog \
+  --msgbox "MLV extracted successfully" \
+  --title "MLV Extraction"
 
 exit 0

@@ -22,30 +22,16 @@
 #
 ###############################################
 
-# We get the directory just from the first filename.
-INPUT_DIR=$(dirname "${1}")
-
-mkdir -p "${INPUT_DIR}"/no_metadata
-
-on_exit() {
-  # If there are no files, we delete no_metadata folder
-  if [[ $(ls -w1 "${INPUT_DIR}/no_metadata" | wc -l) -eq 0 ]]
-  then
-    rm -Rf "${INPUT_DIR}/no_metadata"
-  fi
-}
-
-trap on_exit EXIT
-
-############################################################################################
-
-while [[ $# -gt 0 ]]
+for INPUT in "${@}"
 do
 
-  # Get the correct file extension for an input file, to be used for the new file.
-  EXTENSION=$(echo "${1}" | rev | cut -f 1 -d '.' | rev)
+  INPUT_DIR=$(dirname "${INPUT_DIR}")
+  mkdir -p "${INPUT_DIR}"/no_metadata
 
-  OLD_FILE=$(basename "${1}" | sed "s/\.\w*$/.$EXTENSION/")
+  # Get the correct file extension for an input file, to be used for the new file.
+  EXTENSION=$(echo "${INPUT}" | rev | cut -f 1 -d '.' | rev)
+
+  OLD_FILE=$(basename "${INPUT}" | sed "s/\.\w*$/.$EXTENSION/")
   NEW_FILE=$(basename "${OLD_FILE}" | sed "s/\.\w*$/_no_metadata.$EXTENSION/")
 
   exiftool -all= "${INPUT_DIR}/${OLD_FILE}" -o "${INPUT_DIR}/no_metadata/${NEW_FILE}"

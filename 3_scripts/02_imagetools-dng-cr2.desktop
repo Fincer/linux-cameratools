@@ -11,14 +11,14 @@ X-KDE-Submenu=Image Tools
 [Desktop Action cr2todng]
 Name=CR2 to DNG, detect & convert dual ISO
 Icon=application-x-theme
-Exec=/usr/bin/cr2todng %F
+Exec=/usr/bin/cr2todng_batch_desktop %F
 
 [Desktop Action raw_tags_resize]
 Name=Rename, uncrop & add baseline tags (Canon 5DMK3)
 Icon=application-x-theme
-Exec=/usr/bin/raw_resolution-baseline_canon_5dmk3 %F
+Exec=/usr/bin/raw_resolution-baseline_canon_5dmk3_batch_desktop %F
 
 [Desktop Action correct_mtime]
 Name=Set mtime to DateTimeOriginal
 Icon=application-x-theme
-Exec=/usr/bin/repair_image_mtime %F
+Exec=/usr/bin/repair_image_mtime_batch %F
