@@ -10,7 +10,7 @@ source=(
   imagetools_02_cr2todng_batch_desktop.sh
   imagetools_03_raw_resolution-baseline_canon_5dmk3_batch_desktop.sh
   imagetools_04_mlvdump_batch_desktop.sh
-  imagetools_05_mlvinfo_batch_desktop.sh
+  imagetools_05_mlvinfo_desktop.sh
   imagetools_06_exif_deletedata_batch.sh
   imagetools_06_exif_deletedata_critical_batch.sh
   imagetools_07_ale_stack.sh
@@ -37,16 +37,16 @@ depends=(
 md5sums=('af8ff47782a5e0cdebab7af5ffd8bc8b'
          '85eac2f1c90aa9c69c1ae56de509a5eb'
          '34decae316788b307fa9bf95019f7bfd'
-         'a419e10cd36f0d4108c7aec450d2539b'
+         'ffdbf673bacaff48d9e782d27cfa6234'
          '861b8d571c816711ee918b1b75cc3876'
-         '336c40a4f4811e74d29a70b3e0d7731d'
-         '9e9a3fc943c508264810232ab39dd9b6'
+         'ca6959488844c656803836159dd2a1d2'
+         '628ca4befa6bc65de067bbfce599ea98'
          '3b4f541df70a95292625edf28ed6f349'
-         'cb902e0e832508eb8cc467b31ad204db'
+         '3ee231f6da77907e20190d2f14cae907'
          'fb81862081b7ffbbfd05168c5d28e84e'
-         'ebf6bb1626ea358272a0991910d88ad1'
-         'e5c945d3f28b827427943102a9816d50'
-         '644d651cd40c23efbbd20d14c1bf2434'
+         'ce68fd38ad736423be1cf0cfa815bfaa'
+         'a1dc9be7d4351574a3ea96f4ed7afbd8'
+         '7e51087dfb81a30284e2471effac2fb2'
          'a6e3a56e547a6aaec7135acfdc1d9ce1')
 
 package() {

@@ -30,10 +30,10 @@ depends=(
 md5sums=('7b610cd51c0b06f8d1fd4be80e82769d'
          '6da7f619d03aff2399e7d007971b99ff'
          '22b1ac78265146394bc74edf4a5c23a0'
-         '336c40a4f4811e74d29a70b3e0d7731d'
-         '9e9a3fc943c508264810232ab39dd9b6'
+         'ca6959488844c656803836159dd2a1d2'
+         '628ca4befa6bc65de067bbfce599ea98'
          '3b4f541df70a95292625edf28ed6f349'
-         'cb902e0e832508eb8cc467b31ad204db')
+         '3ee231f6da77907e20190d2f14cae907')
 
 package() {
   mkdir -p "${pkgdir}/usr/bin/"
