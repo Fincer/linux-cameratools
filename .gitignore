@@ -1,0 +1,4 @@
+*.*.md
+3_scripts/*.tar.xz
+3_scripts/pkg
+3_scripts/src
